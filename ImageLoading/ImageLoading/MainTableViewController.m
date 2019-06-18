@@ -15,6 +15,7 @@
 @property (strong, nonatomic) NSString *imageURL;
 @property (strong, nonatomic) NSURL *url;
 @property (strong, nonatomic) NSArray<NSURL*> *imagesURLArray;
+
 @end
 
 @implementation MainTableViewController
@@ -99,6 +100,7 @@
     });
 
 }
+
 -(void)loadView {
     [super loadView];
     UIBarButtonItem *backItem = [[UIBarButtonItem alloc] initWithTitle:@"Back"
@@ -109,6 +111,7 @@
     [self.navigationItem setBackBarButtonItem:backItem];
     self.title = @"Images";
 }
+
 -(void)loadImages {
     _sentImages = [NSMutableArray array];
     for (NSURL *urls in _imagesURLArray) {
@@ -116,7 +119,7 @@
         _imageToSend = [UIImage imageWithData:dataSet];
         [_sentImages addObject: _imageToSend];
     }
-    NSLog(@"%@ images array ", _sentImages);
+    //NSLog(@"%@ images array ", _sentImages);
 }
 
 #pragma mark - Table view data source
@@ -172,11 +175,11 @@
                         [tap setDelegate: self];
                         [cell.imageView addGestureRecognizer:tap];
                         [cell setNeedsLayout];
-//                        [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                     }
                 });
             }
         });
+        [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
     }
     
 
@@ -226,6 +229,10 @@
     [self.navigationController pushViewController:detailsVC animated:NO];
     
     
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section]
+                     atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
 }
 
 - (void)didReceiveMemoryWarning {
