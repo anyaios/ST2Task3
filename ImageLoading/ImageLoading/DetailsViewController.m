@@ -17,6 +17,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.title = @"Details";
+    if (!_detailsImage) {
+        _detailsImage = [UIImage imageNamed:@"placeholder.png"];
+    }
+
+    
+ 
     
     _detailsView = [[UIImageView alloc] initWithFrame:self.view.bounds];
     if (_detailsImage.size.width > self.view.bounds.size.width || _detailsImage.size.height > self.view.bounds.size.height) {
