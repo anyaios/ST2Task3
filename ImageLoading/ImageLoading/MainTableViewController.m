@@ -113,10 +113,10 @@
     [self.navigationItem setBackBarButtonItem:backItem];
     self.title = @"Images";
 }
--(void)viewWillAppear:(BOOL)animated{
-    [super viewWillAppear:NO];
-    [self.tableView reloadData];
-}
+//-(void)viewWillAppear:(BOOL)animated{
+//    [super viewWillAppear:NO];
+//    [self.tableView reloadData];
+//}
 
 -(void)loadImages {
     _sentImages = [NSMutableArray array];
@@ -164,8 +164,6 @@
     cell.imageView.tag = indexPath.row;
     if (_url) {
         cell.imageView.image = [self sizeForImage:[UIImage imageNamed:@"placeholder.png"] changeToSize:CGSizeMake(100,100)];
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnImage:)];
-  
         dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_UTILITY, 0);
         dispatch_async(queue, ^(void) {
             NSData *data = [NSData dataWithContentsOfURL: self.url];
@@ -181,7 +179,7 @@
                         cell.layoutMargins = UIEdgeInsetsZero;
                         cell.preservesSuperviewLayoutMargins = NO;
                         [cell.imageView setUserInteractionEnabled: YES];
-//                        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnImage:)];
+                        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnImage:)];
                         [tap setDelegate: self];
                         [cell.imageView addGestureRecognizer:tap];
                         [cell setNeedsLayout];
@@ -189,7 +187,7 @@
                 });
             }
         });
-//        [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
     }
     
 
