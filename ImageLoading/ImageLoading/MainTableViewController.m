@@ -16,6 +16,7 @@
 @property (strong, nonatomic) NSURL *url;
 @property (strong, nonatomic) NSArray<NSURL*> *imagesURLArray;
 
+
 @end
 
 @implementation MainTableViewController
@@ -93,6 +94,7 @@
                         [NSURL URLWithString:@"https://o.aolcdn.com/images/dims?quality=85&image_uri=http%3A%2F%2Fo.aolcdn.com%2Fhss%2Fstorage%2Fmidas%2F6623d5a6ae583f81ee3515b6b3615c7f%2F204855766%2Flandscape-1456483171-pokemon2.jpg&client=amp-blogside-v2&signature=a66341cc83efebc3c63cadf0db972d9a16e1b05d"],
                         [NSURL URLWithString:@"https://c-sf.smule.com/sf/s45/arr/8a/a8/aaf6447f-1557-4bd3-9f22-2f828444d8d4.jpg"]
                          ];
+
     
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0ul);
     dispatch_async(queue, ^{
@@ -111,6 +113,10 @@
     [self.navigationItem setBackBarButtonItem:backItem];
     self.title = @"Images";
 }
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:NO];
+    [self.tableView reloadData];
+}
 
 -(void)loadImages {
     _sentImages = [NSMutableArray array];
@@ -118,6 +124,7 @@
         NSData *dataSet = [NSData dataWithContentsOfURL: urls];
         _imageToSend = [UIImage imageWithData:dataSet];
         [_sentImages addObject: _imageToSend];
+         self.state = NO;
     }
     //NSLog(@"%@ images array ", _sentImages);
 }
@@ -157,10 +164,13 @@
     cell.imageView.tag = indexPath.row;
     if (_url) {
         cell.imageView.image = [self sizeForImage:[UIImage imageNamed:@"placeholder.png"] changeToSize:CGSizeMake(100,100)];
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnImage:)];
+  
         dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_UTILITY, 0);
         dispatch_async(queue, ^(void) {
             NSData *data = [NSData dataWithContentsOfURL: self.url];
             UIImage* image = [[UIImage alloc] initWithData:data];
+            self.state = YES;
             if (image) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (cell.imageView.tag == indexPath.row) {
@@ -171,7 +181,7 @@
                         cell.layoutMargins = UIEdgeInsetsZero;
                         cell.preservesSuperviewLayoutMargins = NO;
                         [cell.imageView setUserInteractionEnabled: YES];
-                        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnImage:)];
+//                        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnImage:)];
                         [tap setDelegate: self];
                         [cell.imageView addGestureRecognizer:tap];
                         [cell setNeedsLayout];
@@ -179,7 +189,7 @@
                 });
             }
         });
-        [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+//        [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
     }
     
 
@@ -224,7 +234,10 @@
     newArr = _sentImages;
     UIView *view = recognizer.view;
     NSLog(@"%ld recognizer tag", (long)view.tag);
-    detailsVC.detailsImage = newArr[view.tag];
+    detailsVC.detailsImage = nil;
+    if (_state == YES) {
+        detailsVC.detailsImage = newArr[view.tag];
+    }
     NSLog(@"%@ image to sent....", detailsVC.detailsImage);
     [self.navigationController pushViewController:detailsVC animated:NO];
     
