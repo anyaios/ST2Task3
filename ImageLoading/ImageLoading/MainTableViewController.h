@@ -13,7 +13,6 @@
 @interface MainTableViewController : UITableViewController
 @property (strong, nonatomic) UIImage *imageToSend;
 @property (strong, nonatomic) NSMutableArray *sentImages;
-@property BOOL state; 
 @end
 
 

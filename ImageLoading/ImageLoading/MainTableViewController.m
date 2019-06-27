@@ -7,7 +7,7 @@
 //
 
 #import "MainTableViewController.h"
-#import "DetailsViewController.h" 
+#import "DetailsViewController.h"
 
 
 @interface MainTableViewController () <UIGestureRecognizerDelegate>
@@ -36,7 +36,7 @@
                         [NSURL URLWithString:@"https://ichef.bbci.co.uk/news/660/cpsprodpb/E5A5/production/_104398785_dddb06af-e91d-443b-b14f-0be2e0cad0be.jpg"],
                         [NSURL URLWithString: @"https://static.independent.co.uk/s3fs-public/thumbnails/image/2017/03/10/11/best-london-travel-guides.jpg?w968h681"],
                         [NSURL URLWithString:@"https://upload.wikimedia.org/wikipedia/en/1/15/Dipper_Pines.png"],
-
+                        
                         [NSURL URLWithString:@"https://files.gamebanana.com/img/ico/sprays/pika_copy.png"],
                         [NSURL URLWithString:@"https://a.wattpad.com/useravatar/Surprised_Pikachu.256.647193.jpg"],
                         [NSURL URLWithString:@"https://bratz.mgae.com/images/modules/product-module/pack-addons/pack_img_1/cloe_1.png"],
@@ -93,14 +93,9 @@
                         [NSURL URLWithString:@"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/1d6de78a-46e4-4f2c-bcf3-370137fd31e0/dbf1q3v-754ad855-b66f-4734-aff5-b1508322ceb8.png"],
                         [NSURL URLWithString:@"https://o.aolcdn.com/images/dims?quality=85&image_uri=http%3A%2F%2Fo.aolcdn.com%2Fhss%2Fstorage%2Fmidas%2F6623d5a6ae583f81ee3515b6b3615c7f%2F204855766%2Flandscape-1456483171-pokemon2.jpg&client=amp-blogside-v2&signature=a66341cc83efebc3c63cadf0db972d9a16e1b05d"],
                         [NSURL URLWithString:@"https://c-sf.smule.com/sf/s45/arr/8a/a8/aaf6447f-1557-4bd3-9f22-2f828444d8d4.jpg"]
-                         ];
+                        ];
 
     
-    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0ul);
-    dispatch_async(queue, ^{
-         [self loadImages];
-    });
-
 }
 
 -(void)loadView {
@@ -113,31 +108,16 @@
     [self.navigationItem setBackBarButtonItem:backItem];
     self.title = @"Images";
 }
-//-(void)viewWillAppear:(BOOL)animated{
-//    [super viewWillAppear:NO];
-//    [self.tableView reloadData];
-//}
-
--(void)loadImages {
-    _sentImages = [NSMutableArray array];
-    for (NSURL *urls in _imagesURLArray) {
-        NSData *dataSet = [NSData dataWithContentsOfURL: urls];
-        _imageToSend = [UIImage imageWithData:dataSet];
-        [_sentImages addObject: _imageToSend];
-         self.state = NO;
-    }
-    //NSLog(@"%@ images array ", _sentImages);
-}
 
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-
+    
     return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-
+    
     return _imagesURLArray.count;
 }
 
@@ -156,19 +136,13 @@
     static NSString *mainId = @"MainCellid";
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:mainId];
     UITableViewCell *cell =  [tableView dequeueReusableCellWithIdentifier:mainId];
-    if (!cell) {
-        cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:mainId];
-    }
-    
     _url = _imagesURLArray[indexPath.row];
     cell.imageView.tag = indexPath.row;
     if (_url) {
-        cell.imageView.image = [self sizeForImage:[UIImage imageNamed:@"placeholder.png"] changeToSize:CGSizeMake(100,100)];
         dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_UTILITY, 0);
         dispatch_async(queue, ^(void) {
             NSData *data = [NSData dataWithContentsOfURL: self.url];
             UIImage* image = [[UIImage alloc] initWithData:data];
-            self.state = YES;
             if (image) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (cell.imageView.tag == indexPath.row) {
@@ -178,30 +152,31 @@
                         cell.separatorInset = UIEdgeInsetsZero;
                         cell.layoutMargins = UIEdgeInsetsZero;
                         cell.preservesSuperviewLayoutMargins = NO;
-                        [cell.imageView setUserInteractionEnabled: YES];
-                        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnImage:)];
-                        [tap setDelegate: self];
-                        [cell.imageView addGestureRecognizer:tap];
                         [cell setNeedsLayout];
-                    }
+                     }
                 });
             }
         });
+        [tableView beginUpdates];
         [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        [tableView endUpdates];
     }
     
-
-//    NSArray *finalSetImages = [NSArray array];
-//    finalSetImages = _sentImages;
+    [cell.imageView setUserInteractionEnabled: YES];
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnImage: withImage:)];
+    [tap setDelegate: self];
+    [cell.imageView addGestureRecognizer:tap];
+ 
+    
+    cell.imageView.image = [self sizeForImage:[UIImage imageNamed:@"placeholder.png"] changeToSize:CGSizeMake(100,100)];
     _imageURL = [_url absoluteString];
     cell.textLabel.text = _imageURL;
     cell.textLabel.numberOfLines = 0;
     
-
+    
     return cell;
     
 }
-
 
 - (UIImage *)sizeForImage:(UIImage *)image changeToSize:(CGSize)newSize {
     
@@ -226,24 +201,20 @@
 
 #pragma mark - Delegate
 
-- (void)clickOnImage:(UITapGestureRecognizer*)recognizer {
+- (void)clickOnImage:(UITapGestureRecognizer*)recognizer withImage:(NSInteger*)imageViewTag{
+    
     DetailsViewController *detailsVC = [DetailsViewController new];
-    NSArray *newArr = [NSArray array];
-    newArr = _sentImages;
-    UIView *view = recognizer.view;
-    NSLog(@"%ld recognizer tag", (long)view.tag);
-    detailsVC.detailsImage = nil;
-    if (_state == YES) {
-        detailsVC.detailsImage = newArr[view.tag];
-    }
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:recognizer.view.tag inSection:0];
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    detailsVC.detailsImage =  cell.imageView.image;
     NSLog(@"%@ image to sent....", detailsVC.detailsImage);
     [self.navigationController pushViewController:detailsVC animated:NO];
-    
     
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section]
                      atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+
 }
 
 - (void)didReceiveMemoryWarning {
