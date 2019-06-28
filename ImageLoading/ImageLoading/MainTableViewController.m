@@ -64,7 +64,7 @@
                         [NSURL URLWithString:@"https://a.wattpad.com/useravatar/Surprised_Pikachu.256.647193.jpg"],
                         [NSURL URLWithString:@"https://bratz.mgae.com/images/modules/product-module/pack-addons/pack_img_1/cloe_1.png"],
                         [NSURL URLWithString:@"https://www.catster.com/wp-content/uploads/2017/08/A-fluffy-cat-looking-funny-surprised-or-concerned.jpg"],
-                        [NSURL URLWithString: @"https://i.kinja-img.com/gawker-media/image/upload/s--UYWnBrHt--/c_scale,f_auto,fl_progressive,q_80,w_800/wmpvownqus8xwvylswsr.jpg"],
+                        [NSURL URLWithString: @"https://pulson.ru/wp-content/uploads/2013/11/wallpaper-2627235.jpg"],
                         [NSURL URLWithString: @"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTopcG9aTZvFE1qaT02DsoYj4Ch2zabw7uAL6hvNG2HA9oDCH7x"],
                         [NSURL URLWithString:@"https://i.ytimg.com/vi/xO8Cz-9qKTI/hqdefault.jpg"],
                         [NSURL URLWithString:@"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/1d6de78a-46e4-4f2c-bcf3-370137fd31e0/dbf1q3v-754ad855-b66f-4734-aff5-b1508322ceb8.png"],
@@ -94,7 +94,7 @@
                         [NSURL URLWithString:@"https://www.wherethehelliscarl.com/wp-content/uploads/2019/01/20190104_162939_hdr22705782806324179032..jpg"],
                         [NSURL URLWithString:@"https://www.telegraph.co.uk/content/dam/Travel/Destinations/Europe/United%20Kingdom/London/london-aerial-thames-guide-xlarge.jpg"]
                         ];
-
+    
     
 }
 
@@ -140,40 +140,47 @@
     _url = _imagesURLArray[indexPath.row];
     cell.imageView.tag = indexPath.row;
     if (_url) {
-        dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_UTILITY, 0);
+        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
         dispatch_async(queue, ^(void) {
             NSData *data = [NSData dataWithContentsOfURL: self.url];
             UIImage* image = [[UIImage alloc] initWithData:data];
+            
             if (image) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (cell.imageView.tag == indexPath.row) {
+                        
+                        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:image forKey:@"NotificationImageKey"];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:
+                         @"GetImageLoadingNotification" object:nil userInfo:userInfo];
+                        
                         cell.imageView.image = [self sizeForImage:image changeToSize:CGSizeMake(100,100)];
                         [cell.imageView setFrame:CGRectMake(0, 0, 150, 150)];
                         cell.imageView.contentMode = UIViewContentModeScaleAspectFill;
                         cell.separatorInset = UIEdgeInsetsZero;
                         cell.layoutMargins = UIEdgeInsetsZero;
                         cell.preservesSuperviewLayoutMargins = NO;
+                        
                         [cell setNeedsLayout];
-                     }
+                        
+                    }
                 });
             }
         });
-        [tableView beginUpdates];
-        [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-        [tableView endUpdates];
+        //        [tableView beginUpdates];
+        //        [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        //        [tableView endUpdates];
     }
     
     [cell.imageView setUserInteractionEnabled: YES];
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickOnImage: withImage:)];
     [tap setDelegate: self];
     [cell.imageView addGestureRecognizer:tap];
- 
+    
     
     cell.imageView.image = [self sizeForImage:[UIImage imageNamed:@"placeholder.png"] changeToSize:CGSizeMake(100,100)];
     _imageURL = [_url absoluteString];
     cell.textLabel.text = _imageURL;
     cell.textLabel.numberOfLines = 0;
-    
     
     return cell;
     
@@ -202,12 +209,13 @@
 
 #pragma mark - Delegate
 
-- (void)clickOnImage:(UITapGestureRecognizer*)recognizer withImage:(NSInteger*)imageViewTag{
+- (void)clickOnImage:(UITapGestureRecognizer*)recognizer withImage:(UIImage*)image{
     
     DetailsViewController *detailsVC = [DetailsViewController new];
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:recognizer.view.tag inSection:0];
     UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
-    detailsVC.detailsImage =  cell.imageView.image;
+    image = cell.imageView.image;
+    detailsVC.detailsImage =  image;
     NSLog(@"%@ image to sent....", detailsVC.detailsImage);
     [self.navigationController pushViewController:detailsVC animated:NO];
     
@@ -215,7 +223,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section]
                      atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
-
+    
 }
 
 - (void)didReceiveMemoryWarning {
